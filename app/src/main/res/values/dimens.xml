@@ -1,0 +1,6 @@
+<resources>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="tiny_margin">1px</dimen>
+    <dimen name="tiny_margin_2">2px</dimen>
+    <dimen name="keypad_font_size">35sp</dimen>
+</resources>
