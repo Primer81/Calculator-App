@@ -5,8 +5,12 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,15 +20,17 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.lang.reflect.Array;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
 
     String str = "";
-    int parenLevel = 0;
     EditText showResult;
     RelativeLayout historyMenu;
     ArrayList<Character> operators = new ArrayList<Character>(Arrays.asList(
@@ -137,40 +143,13 @@ public class MainActivity extends AppCompatActivity {
 
         history.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                vibrator.vibrate(5);
-                if (historyMenu.isShown()) {
-                    historyMenu.setVisibility(View.GONE);
-                    history.setText("HISTORY");
-                }
-                else {
-                    historyMenu.setVisibility(View.VISIBLE);
-                    history.setText("KEYPAD");
-                }
+            public void onClick(View v) { toggleHistoryMenu();
             }
         });
-
         backspace.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                int selectionStart = showResult.getSelectionStart();
-                int selectionEnd = showResult.getSelectionEnd();
-                if (selectionStart == selectionEnd) {
-                    if (selectionStart > 0) {
-                        vibrator.vibrate(5);
-                        str = str.substring(0, selectionStart - 1)
-                                + str.substring(selectionEnd);
-                        showResult.setText(str);
-                        showResult.setSelection(selectionStart - 1);
-                    }
-                }
-                else {
-                    vibrator.vibrate(5);
-                    str = str.substring(0, selectionStart) + str.substring(selectionEnd);
-                    showResult.setText(str);
-                }
+                backspaceSelected();
             }
         });
 
@@ -221,6 +200,7 @@ public class MainActivity extends AppCompatActivity {
         negate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                insertNegate();
             }
         });
         decimal.setOnClickListener(new View.OnClickListener() {
@@ -240,7 +220,6 @@ public class MainActivity extends AppCompatActivity {
     private void reset() {
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         vibrator.vibrate(5);
-        parenLevel = 0;
         str = "";
         showResult.setText("");
     }
@@ -257,31 +236,53 @@ public class MainActivity extends AppCompatActivity {
                 strongInsert(c);
             }
         }
+        /* CASE: SELECTIONSTART IS ZERO */
+        else if (selectionStart == 0) {
+            if (c == '.') {
+                boolean place = true;
+                for (char ch : str.toCharArray()) {
+                    if (ch == '.') {
+                        place = false;
+                    }
+                    else if (!Character.isDigit(ch)) {
+                        break;
+                    }
+                }
+                if (place) {
+                    strongInsert('0');
+                    strongInsert('.');
+                }
+            }
+            else if (Character.isDigit(c)) {
+                strongInsert(c);
+            }
+        }
         /* CASE: STR IS NOT EMPTY */
         else if (str.length() != 0) {
             char previousSelected = str.charAt(selectionStart - 1); // char before cursor
             /* CASE: PREVIOUS SELECTED IS AN OPERATOR OR OPEN PARENTHESIS */
             if (operators.contains(previousSelected) || previousSelected == '(') {
+                /* CASE: C IS A DIGIT, OPEN PARENTHESIS, OR DECIMAL */
                 if (Character.isDigit(c) || c == '(' || c == '.') {
                     strongInsert(c);
                 }
             }
-            /* CASE: PREVIOUS SELECTED IS A CLOSED PARENTHESIS */
-            else if (previousSelected == ')') {
+            /* CASE: PREVIOUS SELECTED IS A CLOSED PARENTHESIS OR A PERCENTAGE */
+            else if (previousSelected == ')' || previousSelected == '%') {
                 // CASE: C IS A OPERATOR
                 if (operators.contains(c)) {
                     strongInsert(c);
                 }
-                /* CASE: C IS A DIGIT, DECIMAL, OR OPEN PARENTHESIS */
+                /* CASE: C IS A DIGIT, DECIMAL, PERCENTAGE, OR OPEN PARENTHESIS */
                 else if (Character.isDigit(c) || c == '.' || c == '(') {
                     strongInsert('*');
                     strongInsert(c);
                 }
             }
-            /* CASE: PREVIOUS SELECTED IS A DIGIT OR A DECIMAL */
+            /* CASE: PREVIOUS SELECTED IS A DIGIT, A DECIMAL */
             else if (Character.isDigit(previousSelected) || previousSelected == '.') {
-                /* CASE: C IS AN OPERATOR */
-                if (operators.contains(c)) {
+                /* CASE: C IS AN OPERATOR OR PERCENTAGE */
+                if (operators.contains(c) || c == '%') {
                     strongInsert(c);
                 }
                 /* CASE: C IS A DIGIT */
@@ -351,22 +352,116 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void insertNegate() {
+        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator.vibrate(5);
+        int selectionStart = showResult.getSelectionStart();
+
+        /* CASE: STR IS EMPTY */
+        if (str.length() == 0) {
+            strongInsert('(');
+            strongInsert('-');
+        }
+        /* CASE: STR IS NOT EMPTY */
+        else if (str.length() != 0) {
+            char previousSelected = str.charAt(selectionStart - 1); // char before cursor
+            if (Character.isDigit(previousSelected) || previousSelected == '.') {
+                char chars[] = str.substring(0, selectionStart).toCharArray();
+                int offset = selectionStart;
+                for (int i = selectionStart - 2; i >= 0; i--) {
+                    if (!Character.isDigit(chars[i]) && chars[i] != '.') {
+                        offset = (selectionStart - 1) - i;
+                        break;
+                    }
+                }
+                showResult.setSelection(selectionStart - offset);
+                strongInsert('(');
+                strongInsert('-');
+                showResult.setSelection(selectionStart + 2);
+            }
+            else if (operators.contains(previousSelected)){
+                strongInsert('(');
+                strongInsert('-');
+            }
+            else {
+                strongInsert('*');
+                strongInsert('(');
+                strongInsert('-');
+            }
+        }
+    }
+
     private void strongInsert(char c) {
         int selectionStart = showResult.getSelectionStart();
         int selectionEnd = showResult.getSelectionEnd();
         str = str.substring(0, selectionStart) + c + str.substring(selectionEnd);
-        showResult.setText(str);
+        // change operator characters' colors to blue
+        setResultText(str);
         showResult.setSelection(selectionStart + 1);
+    }
+
+    private void backspaceSelected() {
+        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        int selectionStart = showResult.getSelectionStart();
+        int selectionEnd = showResult.getSelectionEnd();
+        if (selectionStart == selectionEnd) {
+            if (selectionStart > 0) {
+                vibrator.vibrate(5);
+                str = str.substring(0, selectionStart - 1)
+                        + str.substring(selectionEnd);
+                setResultText(str);
+                showResult.setSelection(selectionStart - 1);
+            }
+        }
+        else {
+            vibrator.vibrate(5);
+            str = str.substring(0, selectionStart) + str.substring(selectionEnd);
+            showResult.setText(str);
+        }
     }
 
     private void calculate() {
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         vibrator.vibrate(5);
         if (!str.isEmpty()) {
-            str = Double.toString(this.eval(str));
-            showResult.setText(str);
+            DecimalFormat df = new DecimalFormat("#,###,###,###,###,##0.##############");
+            str = df.format(eval(str.replace("%", "/100")));
+            // change the results text color to blue
+            SpannableStringBuilder sb = new SpannableStringBuilder(str);
+            sb.setSpan(new ForegroundColorSpan(getColorRefHex(R.color.LightBlue)),
+                    0, str.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+            showResult.setText(sb, TextView.BufferType.SPANNABLE);
             showResult.setSelection(str.length());
         }
+    }
+
+    private void setResultText(String str) {
+        // change operator characters' colors to blue
+        SpannableStringBuilder sb = new SpannableStringBuilder(str);
+        Pattern p = Pattern.compile("[(?![(][-])&&[/*+%-]]");
+        Matcher m = p.matcher(str);
+        while (m.find()){
+            sb.setSpan(new ForegroundColorSpan(getColorRefHex(R.color.LightBlue)),
+                    m.start(), m.end(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+        }
+        showResult.setText(sb, TextView.BufferType.SPANNABLE);
+    }
+
+    private void toggleHistoryMenu() {
+        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator.vibrate(5);
+        if (historyMenu.isShown()) {
+            historyMenu.setVisibility(View.GONE);
+            history.setText("HISTORY");
+        }
+        else {
+            historyMenu.setVisibility(View.VISIBLE);
+            history.setText("KEYPAD");
+        }
+    }
+
+    private int getColorRefHex(@android.support.annotation.ColorRes int id) {
+        return ContextCompat.getColor(getApplicationContext(), id);
     }
 
     @Override
