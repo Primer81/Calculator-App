@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/VeryLightGray"
+    android:background="@color/Keypad_Border_Color"
     tools:context="efcee.calculator.MainActivity">
 
     <!--Result View-->
@@ -30,7 +30,7 @@
         app:layout_constraintBottom_toTopOf="@+id/backspace"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_weight="3"
+        app:layout_constraintVertical_weight="3.3"
         app:layout_constraintHorizontal_weight="1"/>
 
     <!--History Button-->
@@ -496,7 +496,7 @@
         android:id="@+id/history_menu"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@color/VeryLightGray"
+        android:background="@color/Keypad_Border_Color"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/equal"

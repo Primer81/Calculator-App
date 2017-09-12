@@ -3,4 +3,6 @@
     <dimen name="tiny_margin">1px</dimen>
     <dimen name="tiny_margin_2">2px</dimen>
     <dimen name="keypad_font_size">35sp</dimen>
+    <dimen name="keypad_font_size_land">25sp</dimen>
+    <dimen name="function_keys_font_size">20sp</dimen>
 </resources>
