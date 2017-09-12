@@ -10,7 +10,6 @@ import android.text.InputType;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,6 +18,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
     String str = "";
     EditText showResult;
     RelativeLayout historyMenu;
-    ArrayList<Character> operators = new ArrayList<Character>(Arrays.asList(
+    ArrayList<Character> operators = new ArrayList<>(Arrays.asList(
             '/','*','-','+'));
 
     // number buttons
@@ -46,8 +46,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-
-        onResume();
+        enableFullscreen();
 
         one = (Button) this.findViewById(R.id.one);
         two = (Button) this.findViewById(R.id.two);
@@ -273,10 +272,14 @@ public class MainActivity extends AppCompatActivity {
                 if (operators.contains(c)) {
                     strongInsert(c);
                 }
-                /* CASE: C IS A DIGIT, DECIMAL, PERCENTAGE, OR OPEN PARENTHESIS */
-                else if (Character.isDigit(c) || c == '.' || c == '(') {
+                /* CASE: C IS A DIGIT, DECIMAL, OR PERCENTAGE */
+                else if (Character.isDigit(c) || c == '.') {
                     strongInsert('*');
                     strongInsert(c);
+                }
+                /* CASE: C IS AN OPEN PARENTHESIS */
+                else if (c == '(') {
+                    insertParenthesis();
                 }
             }
             /* CASE: PREVIOUS SELECTED IS A DIGIT, A DECIMAL */
@@ -315,25 +318,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 /* CASE: C IS AN OPEN PARENTHESIS */
                 if (c == '(') {
-                    // determine the parenthesis level at the current selection
-                    char chars[] = str.substring(0, selectionStart).toCharArray();
-                    int parenLevel = 0;
-                    for (int i = selectionStart - 1; i >= 0; i--) {
-                        if (chars[i] == ')') {
-                            parenLevel -= 1;
-                        }
-                        else if (chars[i] == '(') {
-                            parenLevel += 1;
-                        }
-                    }
-                    // insert based on parenLevel
-                    if (parenLevel == 0) {
-                        strongInsert('*');
-                        strongInsert(c);
-                    }
-                    else {
-                        strongInsert(')');
-                    }
+                    insertParenthesis();
                 }
                 /* CASE: C IS A DECIMAL */
                 else if (c == '.') {
@@ -349,6 +334,29 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             }
+        }
+    }
+
+    private void insertParenthesis() {
+        int selectionStart = showResult.getSelectionStart();
+        // determine the parenthesis level at the current selection
+        char chars[] = str.substring(0, selectionStart).toCharArray();
+        int parenLevel = 0;
+        for (int i = selectionStart - 1; i >= 0; i--) {
+            if (chars[i] == ')') {
+                parenLevel -= 1;
+            }
+            else if (chars[i] == '(') {
+                parenLevel += 1;
+            }
+        }
+        // insert based on parenLevel
+        if (parenLevel == 0) {
+            strongInsert('*');
+            strongInsert('(');
+        }
+        else {
+            strongInsert(')');
         }
     }
 
@@ -423,22 +431,26 @@ public class MainActivity extends AppCompatActivity {
     private void calculate() {
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         vibrator.vibrate(5);
-        if (!str.isEmpty()) {
-            DecimalFormat df = new DecimalFormat("#,###,###,###,###,##0.##############");
-            str = df.format(eval(str.replace("%", "/100")));
-            // change the results text color to blue
-            SpannableStringBuilder sb = new SpannableStringBuilder(str);
-            sb.setSpan(new ForegroundColorSpan(getColorRefHex(R.color.LightBlue)),
-                    0, str.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-            showResult.setText(sb, TextView.BufferType.SPANNABLE);
-            showResult.setSelection(str.length());
+        try {
+            if (!str.isEmpty()) {
+                DecimalFormat df = new DecimalFormat("#,###,###,###,###,##0.##############");
+                str = df.format(eval(str.replace("%", "/100")));
+                // change the results text color to blue
+                SpannableStringBuilder sb = new SpannableStringBuilder(str);
+                sb.setSpan(new ForegroundColorSpan(getColorRefHex(R.color.LightBlue)),
+                        0, str.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                showResult.setText(sb, TextView.BufferType.SPANNABLE);
+                showResult.setSelection(str.length());
+            }
+        } catch (RuntimeException e) {
+            alertMessage("Invalid format used.");
         }
     }
 
     private void setResultText(String str) {
         // change operator characters' colors to blue
         SpannableStringBuilder sb = new SpannableStringBuilder(str);
-        Pattern p = Pattern.compile("[(?![(][-])&&[/*+%-]]");
+        Pattern p = Pattern.compile("[/*+%-](?<!\\(-)");
         Matcher m = p.matcher(str);
         while (m.find()){
             sb.setSpan(new ForegroundColorSpan(getColorRefHex(R.color.LightBlue)),
@@ -478,9 +490,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
+    public void enableFullscreen() {
         // If the Android version is lower than Jellybean, use this call to hide
         // the status bar.
         if (Build.VERSION.SDK_INT < 16) {
@@ -494,6 +504,16 @@ public class MainActivity extends AppCompatActivity {
             int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
             decorView.setSystemUiVisibility(uiOptions);
         }
+    }
+
+    public void alertMessage(String Message) {
+        Toast.makeText(this, Message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        this.enableFullscreen();
     }
 
     @Override
