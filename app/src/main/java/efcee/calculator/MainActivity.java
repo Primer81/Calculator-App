@@ -224,7 +224,7 @@ public class MainActivity extends AppCompatActivity {
         parenthesis.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insert('(');
+                insertParenthesis();
             }
         });
         percent.setOnClickListener(new View.OnClickListener() {
@@ -459,50 +459,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void toggleFunctionPage() {
-        vibrate();
-        Button hiddenButtons[];
-        Button visibleButtons[];
-        if (second.getVisibility() == View.VISIBLE) {
-            visibleButtons = new Button[]{
-                    second, squareRoot, sin, cos, tan, natLog, log, reciprocal, eulerToTheX,
-                    squared, xToTheY, absolute, piConstant, euler};
-            hiddenButtons = new Button[]{
-                    first, cubeRoot, iSin, iCos, iTan, sinh, cosh, tanh,
-                    iSinh, iCosh, iTanh, twoToTheX, cubed, factorial};
-        }
-        else {
-            visibleButtons = new Button[]{
-                    first, cubeRoot, iSin, iCos, iTan, sinh, cosh, tanh,
-                    iSinh, iCosh, iTanh, twoToTheX, cubed, factorial};
-            hiddenButtons = new Button[]{
-                    second, squareRoot, sin, cos, tan, natLog, log, reciprocal, eulerToTheX,
-                    squared, xToTheY, absolute, piConstant, euler};
-        }
-        for (Button b : visibleButtons) {
-            b.setVisibility(View.INVISIBLE);
-        }
-        for (Button b : hiddenButtons) {
-            b.setVisibility(View.VISIBLE);
-        }
-    }
-
-    private void toggleRadianDegree() {
-        vibrate();
-        if (radianDegree.getText() == getResources().getString(R.string.radian)) {
-            radianDegree.setText(getResources().getString(R.string.degree));
-        }
-        else {
-            radianDegree.setText(getResources().getString(R.string.radian));
-        }
-    }
-
-    private void reset() {
-        vibrate();
-        str = "";
-        showResult.setText("");
-    }
-
     private void insert(char c) {
         vibrate();
         int selectionStart = showResult.getSelectionStart();
@@ -510,11 +466,11 @@ public class MainActivity extends AppCompatActivity {
 
         /* CASE: STR IS EMPTY */
         if (str.length() == 0) {
-            if (Character.isDigit(c) || c == '(' || c == '.') {
+            if (Character.isDigit(c) || c == '.') {
                 strongInsert(c);
             }
         }
-        /* CASE: SELECTIONSTART IS ZERO */
+        /* CASE: SELECTION_START IS ZERO */
         else if (selectionStart == 0) {
             if (c == '.') {
                 boolean place = true;
@@ -540,8 +496,8 @@ public class MainActivity extends AppCompatActivity {
             char previousSelected = str.charAt(selectionStart - 1); // char before cursor
             /* CASE: PREVIOUS SELECTED IS AN OPERATOR OR OPEN PARENTHESIS */
             if (operators.contains(previousSelected) || previousSelected == '(') {
-                /* CASE: C IS A DIGIT, OPEN PARENTHESIS, OR DECIMAL */
-                if (Character.isDigit(c) || c == '(' || c == '.') {
+                /* CASE: C IS A DIGIT OR DECIMAL */
+                if (Character.isDigit(c) || c == '.') {
                     strongInsert(c);
                 }
             }
@@ -555,10 +511,6 @@ public class MainActivity extends AppCompatActivity {
                 else if (Character.isDigit(c) || c == '.') {
                     strongInsert('*');
                     strongInsert(c);
-                }
-                /* CASE: C IS AN OPEN PARENTHESIS */
-                else if (c == '(') {
-                    insertParenthesis();
                 }
             }
             /* CASE: PREVIOUS SELECTED IS A DIGIT, A DECIMAL */
@@ -595,10 +547,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 }
-                /* CASE: C IS AN OPEN PARENTHESIS */
-                if (c == '(') {
-                    insertParenthesis();
-                }
                 /* CASE: C IS A DECIMAL */
                 else if (c == '.') {
                     char chars[] = str.substring(0, selectionStart).toCharArray();
@@ -617,25 +565,30 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void insertParenthesis() {
+        vibrate();
         int selectionStart = showResult.getSelectionStart();
-        // determine the parenthesis level at the current selection
-        char chars[] = str.substring(0, selectionStart).toCharArray();
-        int parenLevel = 0;
-        for (int i = selectionStart - 1; i >= 0; i--) {
-            if (chars[i] == ')') {
-                parenLevel -= 1;
-            }
-            else if (chars[i] == '(') {
-                parenLevel += 1;
-            }
-        }
-        // insert based on parenLevel
-        if (parenLevel == 0) {
-            strongInsert('*');
+        if (str.isEmpty() || selectionStart == 0
+                || operators.contains(str.charAt(selectionStart - 1))) {
             strongInsert('(');
         }
         else {
-            strongInsert(')');
+            // determine the parenthesis level at the current selection
+            char chars[] = str.substring(0, selectionStart).toCharArray();
+            int parenLevel = 0;
+            for (int i = selectionStart - 1; i >= 0; i--) {
+                if (chars[i] == ')') {
+                    parenLevel -= 1;
+                } else if (chars[i] == '(') {
+                    parenLevel += 1;
+                }
+            }
+            // insert based on parenLevel
+            if (parenLevel == 0) {
+                strongInsert('*');
+                strongInsert('(');
+            } else {
+                strongInsert(')');
+            }
         }
     }
 
@@ -684,6 +637,50 @@ public class MainActivity extends AppCompatActivity {
         // change operator characters' colors to blue
         setResultText(str);
         showResult.setSelection(selectionStart + 1);
+    }
+
+    private void toggleFunctionPage() {
+        vibrate();
+        Button hiddenButtons[];
+        Button visibleButtons[];
+        if (second.getVisibility() == View.VISIBLE) {
+            visibleButtons = new Button[]{
+                    second, squareRoot, sin, cos, tan, natLog, log, reciprocal, eulerToTheX,
+                    squared, xToTheY, absolute, piConstant, euler};
+            hiddenButtons = new Button[]{
+                    first, cubeRoot, iSin, iCos, iTan, sinh, cosh, tanh,
+                    iSinh, iCosh, iTanh, twoToTheX, cubed, factorial};
+        }
+        else {
+            visibleButtons = new Button[]{
+                    first, cubeRoot, iSin, iCos, iTan, sinh, cosh, tanh,
+                    iSinh, iCosh, iTanh, twoToTheX, cubed, factorial};
+            hiddenButtons = new Button[]{
+                    second, squareRoot, sin, cos, tan, natLog, log, reciprocal, eulerToTheX,
+                    squared, xToTheY, absolute, piConstant, euler};
+        }
+        for (Button b : visibleButtons) {
+            b.setVisibility(View.INVISIBLE);
+        }
+        for (Button b : hiddenButtons) {
+            b.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void toggleRadianDegree() {
+        vibrate();
+        if (radianDegree.getText() == getResources().getString(R.string.radian)) {
+            radianDegree.setText(getResources().getString(R.string.degree));
+        }
+        else {
+            radianDegree.setText(getResources().getString(R.string.radian));
+        }
+    }
+
+    private void reset() {
+        vibrate();
+        str = "";
+        showResult.setText("");
     }
 
     private void backspaceSelected() {
