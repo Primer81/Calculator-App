@@ -266,7 +266,7 @@ public class MainActivity extends AppCompatActivity {
         decimal.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insert('.');
+                insertDecimal();
             }
         });
         equal.setOnClickListener(new View.OnClickListener() {
@@ -353,7 +353,7 @@ public class MainActivity extends AppCompatActivity {
             piConstant.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    insert('1');
+                    strongInsert('\u03C0');
                 }
             });
             euler.setOnClickListener(new View.OnClickListener() {
@@ -464,30 +464,9 @@ public class MainActivity extends AppCompatActivity {
         int selectionStart = showResult.getSelectionStart();
         int selectionEnd = showResult.getSelectionEnd();
 
-        /* CASE: STR IS EMPTY */
-        if (str.length() == 0) {
+        /* CASE: STR IS EMPTY OR SELECTION_START IS ZERO */
+        if (str.isEmpty() || selectionStart == 0) {
             if (Character.isDigit(c) || c == '.') {
-                strongInsert(c);
-            }
-        }
-        /* CASE: SELECTION_START IS ZERO */
-        else if (selectionStart == 0) {
-            if (c == '.') {
-                boolean place = true;
-                for (char ch : str.toCharArray()) {
-                    if (ch == '.') {
-                        place = false;
-                    }
-                    else if (!Character.isDigit(ch)) {
-                        break;
-                    }
-                }
-                if (place) {
-                    strongInsert('0');
-                    strongInsert('.');
-                }
-            }
-            else if (Character.isDigit(c)) {
                 strongInsert(c);
             }
         }
@@ -497,7 +476,7 @@ public class MainActivity extends AppCompatActivity {
             /* CASE: PREVIOUS SELECTED IS AN OPERATOR OR OPEN PARENTHESIS */
             if (operators.contains(previousSelected) || previousSelected == '(') {
                 /* CASE: C IS A DIGIT OR DECIMAL */
-                if (Character.isDigit(c) || c == '.') {
+                if (Character.isDigit(c)) {
                     strongInsert(c);
                 }
             }
@@ -507,8 +486,8 @@ public class MainActivity extends AppCompatActivity {
                 if (operators.contains(c)) {
                     strongInsert(c);
                 }
-                /* CASE: C IS A DIGIT, DECIMAL, OR PERCENTAGE */
-                else if (Character.isDigit(c) || c == '.') {
+                /* CASE: C IS A DIGIT OR PERCENTAGE */
+                else if (Character.isDigit(c)) {
                     strongInsert('*');
                     strongInsert(c);
                 }
@@ -523,7 +502,7 @@ public class MainActivity extends AppCompatActivity {
                 else if (Character.isDigit(c)) {
                     /* CASE: STR IS OF LENGTH ONE */
                     if (str.length() == 1) {
-                        if (previousSelected == '0' && c != '.') {
+                        if (previousSelected == '0') {
                             str = "";
                             showResult.setSelection(selectionStart - 1);
                             strongInsert(c);
@@ -534,7 +513,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     /* CASE: STR IS NOT OF LENGTH ONE */
                     else {
-                        if (previousSelected == '0' && c != '.'
+                        if (previousSelected == '0'
                                 && !Character.isDigit(str.charAt(selectionStart - 2))
                                 && str.charAt(selectionStart - 2) != '.') {
                             str = str.substring(0, selectionStart - 1)
@@ -544,19 +523,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                         else {
                             strongInsert(c);
-                        }
-                    }
-                }
-                /* CASE: C IS A DECIMAL */
-                else if (c == '.') {
-                    char chars[] = str.substring(0, selectionStart).toCharArray();
-                    for (int i = selectionStart - 1; i >= 0; i--) {
-                        if (chars[i] == '.') {
-                            break;
-                        }
-                        else if (!Character.isDigit(chars[i]) || i == 0) {
-                            strongInsert(c);
-                            break;
                         }
                     }
                 }
@@ -570,6 +536,9 @@ public class MainActivity extends AppCompatActivity {
         if (str.isEmpty() || selectionStart == 0
                 || operators.contains(str.charAt(selectionStart - 1))) {
             strongInsert('(');
+        }
+        else if (str.charAt(selectionStart - 1) == '('){
+            return; // do nothing
         }
         else {
             // determine the parenthesis level at the current selection
@@ -589,6 +558,51 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 strongInsert(')');
             }
+        }
+    }
+
+    private void insertDecimal() {
+        vibrate();
+        int selectionStart = showResult.getSelectionStart();
+        char chars[] = str.toCharArray();
+
+        // scan the currently selected number for any decimals and return if found
+        // scan beyond the current selection
+        for (int i = selectionStart; i < str.length(); i++) {
+            if (chars[i] == '.') {
+                return;
+            }
+            else if (!Character.isDigit(chars[i])) {
+                break;
+            }
+        }
+        // scan behind the current selection
+        for (int i = selectionStart - 1; i >= 0; i--) {
+            if (chars[i] == '.') {
+                return;
+            }
+            else if (!Character.isDigit(chars[i]) || i == 0) {
+                break;
+            }
+        }
+        // no decimals have been found so the format for placing is determined below
+        char previousSelected = (str.isEmpty() || selectionStart == 0)
+                ? ' ' : str.charAt(selectionStart - 1);
+        if (str.isEmpty()
+                || selectionStart == 0
+                || operators.contains(previousSelected)
+                || previousSelected == '(') {
+            strongInsert('0');
+            strongInsert('.');
+        }
+        else if (previousSelected == '%' || previousSelected == ')' || previousSelected == '!'
+                || previousSelected == 'e' || previousSelected == '\u03C0' /* pi */) {
+            strongInsert('*');
+            strongInsert('0');
+            strongInsert('.');
+        }
+        else {
+            strongInsert('.');
         }
     }
 
