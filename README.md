@@ -9,4 +9,4 @@ quick solutions to the expression being typed.
 
 The functionality is intermediate at the moment, only supporting addition, 
 subtraction, multiplication, division, parenthesis, decimals, and percentages. Functions and exponentials are next with 
-the function pad ui in the lanscape view complete!
+the function pad UI complete!
