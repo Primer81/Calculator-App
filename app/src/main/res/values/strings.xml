@@ -3,6 +3,8 @@
     <string name="action_settings">Settings</string>
     <string name="backspace">\u232b</string>
     <string name="second_key">\u21C6 2nd</string>
-    <string name="radical">\u221A</string>
+    <string name="first_key">\u21C6 1st</string>
+    <string name="square_root">\u221A</string>
+    <string name="cube_root">\u221Bx</string>
     <string name="pi_symbol">\u03C0</string>
 </resources>
