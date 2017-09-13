@@ -8,4 +8,5 @@ Currently, the UI is setup to look exactly like the target app, but is missing i
 quick solutions to the expression being typed. 
 
 The functionality is intermediate at the moment, only supporting addition, 
-subtraction, multiplication, division, parenthesis, decimals, and percentages. Functions and exponentials are next.
+subtraction, multiplication, division, parenthesis, decimals, and percentages. Functions and exponentials are next with their ui
+in the lanscape view almost complete!
