@@ -57,6 +57,9 @@ public class MainActivity extends AppCompatActivity {
             "sin(", "cos(", "tan(", "ln(", "log(", "abs(", "asin(", "acos(",
             "atan(", "sinh(", "cosh(", "tanh(", "asinh(", "acosh(", "atanh("));
 
+    // boolean to check if in Radians mode
+    boolean radians = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -565,25 +568,16 @@ public class MainActivity extends AppCompatActivity {
         vibrate();
         int selectionStart = showResult.getSelectionStart();
         char chars[] = str.toCharArray();
-
-        // scan the currently selected number for any decimals and return if found
+        // scan the currently selected number for any decimals and return if found.
         // scan beyond the current selection
         for (int i = selectionStart; i < str.length(); i++) {
-            if (chars[i] == '.') {
-                return;
-            }
-            else if (!Character.isDigit(chars[i])) {
-                break;
-            }
+            if (chars[i] == '.') { return; }
+            else if (!Character.isDigit(chars[i])) { break; }
         }
         // scan behind the current selection
         for (int i = selectionStart - 1; i >= 0; i--) {
-            if (chars[i] == '.') {
-                return;
-            }
-            else if (!Character.isDigit(chars[i]) || i == 0) {
-                break;
-            }
+            if (chars[i] == '.') { return; }
+            else if (!Character.isDigit(chars[i])) { break; }
         }
         // no decimals have been found so the format for placing is determined below
         char previousSelected = (str.isEmpty() || selectionStart == 0)
@@ -685,9 +679,11 @@ public class MainActivity extends AppCompatActivity {
         vibrate();
         if (radianDegree.getText() == getResources().getString(R.string.radian)) {
             radianDegree.setText(getResources().getString(R.string.degree));
+            radians = true;
         }
         else {
             radianDegree.setText(getResources().getString(R.string.radian));
+            radians = false;
         }
     }
 
@@ -722,7 +718,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             if (!str.isEmpty()) {
                 DecimalFormat df = new DecimalFormat("#,###,###,###,###,##0.##############");
-                str = df.format(eval(str.replace("%", "/100")));
+                str = df.format(eval(str.replace("%", "/100"), radians));
                 // change the results text color to blue
                 SpannableStringBuilder sb = new SpannableStringBuilder(str);
                 sb.setSpan(new ForegroundColorSpan(getColorRefHex(R.color.LightBlue)),
@@ -830,9 +826,18 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public static double eval(final String str) {
+    private static double eval(final String str, final boolean radians) {
         return new Object() {
             int pos = -1, ch;
+
+            private double toRadians(double x) {
+                if (radians) {
+                    return x; // assume input is already in radians
+                }
+                else {
+                    return Math.toRadians(x); // convert degrees to radians
+                }
+            }
 
             void nextChar() {
                 ch = (++pos < str.length()) ? str.charAt(pos) : -1;
@@ -895,9 +900,23 @@ public class MainActivity extends AppCompatActivity {
                     String func = str.substring(startPos, this.pos);
                     x = parseFactor();
                     if (func.equals("sqrt")) x = Math.sqrt(x);
-                    else if (func.equals("sin")) x = Math.sin(Math.toRadians(x));
-                    else if (func.equals("cos")) x = Math.cos(Math.toRadians(x));
-                    else if (func.equals("tan")) x = Math.tan(Math.toRadians(x));
+                    else if (func.equals("fact")) x = MathPlus.fact((int) x);
+                    else if (func.equals("cbrt")) x = Math.cbrt(x);
+                    else if (func.equals("ln")) x = Math.log(x);
+                    else if (func.equals("log")) x = Math.log10(x);
+                    else if (func.equals("abs")) x = Math.abs(x);
+                    else if (func.equals("sin")) x = Math.sin(toRadians(x));
+                    else if (func.equals("cos")) x = Math.cos(toRadians(x));
+                    else if (func.equals("tan")) x = Math.tan(toRadians(x));
+                    else if (func.equals("asin")) x = Math.asin(toRadians(x));
+                    else if (func.equals("acos")) x = Math.acos(toRadians(x));
+                    else if (func.equals("atan")) x = Math.atan(toRadians(x));
+                    else if (func.equals("sinh")) x = Math.sinh(toRadians(x));
+                    else if (func.equals("cosh")) x = Math.cosh(toRadians(x));
+                    else if (func.equals("tanh")) x = Math.tanh(toRadians(x));
+                    else if (func.equals("asinh")) x = MathPlus.asinh(toRadians(x));
+                    else if (func.equals("acosh")) x = MathPlus.acosh(toRadians(x));
+                    else if (func.equals("atanh")) x = MathPlus.atanh(toRadians(x));
                     else throw new RuntimeException("Unknown function: " + func);
                 } else {
                     throw new RuntimeException("Unexpected: " + (char)ch);
