@@ -7,4 +7,6 @@
     <string name="square_root">\u221A</string>
     <string name="cube_root">\u221Bx</string>
     <string name="pi_symbol">\u03C0</string>
+    <string name="degree">Deg</string>
+    <string name="radian">Rad</string>
 </resources>

@@ -41,13 +41,42 @@ public class MainActivity extends AppCompatActivity {
     Button  history, backspace, clear, parenthesis, percent,
             div, mul, sub, add, negate, decimal, equal;
 
+    // function buttons page 1
+    Button second, squareRoot, sin, cos, tan, natLog, log, reciprocal, eulerToTheX,
+            squared, xToTheY, absolute, piConstant, euler;
+
+    // function buttons page 2
+    Button first, cubeRoot, iSin, iCos, iTan, sinh, cosh, tanh,
+            iSinh, iCosh, iTanh, twoToTheX, cubed, factorial;
+
+    // radian and degree button
+    Button radianDegree;
+
+    // phrases to be treated as a single character (functions)
+    ArrayList<String> characterPhrases = new ArrayList<>(Arrays.asList(
+            "sin(", "cos(", "tan(", "ln(", "log(", "abs(", "asin(", "acos(",
+            "atan(", "sinh(", "cosh(", "tanh(", "asinh(", "acosh(", "atanh("));
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        this.getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         enableFullscreen();
 
+        initIds();
+        initOnClickListeners();
+
+        disableSoftInputFromAppearing(showResult);
+    }
+
+    private void initIds() {
+        // misc ids
+        showResult = (EditText) findViewById(R.id.result_id);
+        historyMenu = (RelativeLayout) findViewById(R.id.history_menu);
+
+        // number buttons
         one = (Button) this.findViewById(R.id.one);
         two = (Button) this.findViewById(R.id.two);
         three = (Button) this.findViewById(R.id.three);
@@ -59,26 +88,60 @@ public class MainActivity extends AppCompatActivity {
         nine = (Button) this.findViewById(R.id.nine);
         zero = (Button) this.findViewById(R.id.zero);
 
+        // other buttons
         history = (Button) this.findViewById(R.id.history);
         backspace = (Button) this.findViewById(R.id.backspace);
-
         clear = (Button) this.findViewById(R.id.clear);
         parenthesis = (Button) this.findViewById(R.id.parenthesis);
         percent = (Button) this.findViewById(R.id.percent);
-
         div = (Button) this.findViewById(R.id.div);
         mul = (Button) this.findViewById(R.id.mul);
         sub = (Button) this.findViewById(R.id.sub);
         add = (Button) this.findViewById(R.id.add);
-
         negate = (Button) this.findViewById(R.id.negate);
         decimal = (Button) this.findViewById(R.id.decimal);
         equal = (Button) this.findViewById(R.id.equal);
 
-        showResult = (EditText) findViewById(R.id.result_id);
-        disableSoftInputFromAppearing(showResult);
-        historyMenu = (RelativeLayout) findViewById(R.id.history_menu);
+        if (getResources().getConfiguration().orientation == 2) { // 1 == portrait; 2 == landscape
+            // function buttons page 1
+            second = (Button) this.findViewById(R.id.second);
+            squareRoot = (Button) this.findViewById(R.id.squareRoot);
+            sin = (Button) this.findViewById(R.id.sin);
+            cos = (Button) this.findViewById(R.id.cos);
+            tan = (Button) this.findViewById(R.id.tan);
+            natLog = (Button) this.findViewById(R.id.natLog);
+            log = (Button) this.findViewById(R.id.log);
+            reciprocal = (Button) this.findViewById(R.id.reciprocal);
+            eulerToTheX = (Button) this.findViewById(R.id.eulerToTheX);
+            squared = (Button) this.findViewById(R.id.squared);
+            xToTheY = (Button) this.findViewById(R.id.xToTheY);
+            absolute = (Button) this.findViewById(R.id.absolute);
+            piConstant = (Button) this.findViewById(R.id.piConstant);
+            euler = (Button) this.findViewById(R.id.euler);
 
+            // function buttons page 2
+            first = (Button) this.findViewById(R.id.first);
+            cubeRoot = (Button) this.findViewById(R.id.cubeRoot);
+            iSin = (Button) this.findViewById(R.id.iSin);
+            iCos = (Button) this.findViewById(R.id.iCos);
+            iTan = (Button) this.findViewById(R.id.iTan);
+            sinh = (Button) this.findViewById(R.id.sinh);
+            cosh = (Button) this.findViewById(R.id.cosh);
+            tanh = (Button) this.findViewById(R.id.tanh);
+            iSinh = (Button) this.findViewById(R.id.iSinh);
+            iCosh = (Button) this.findViewById(R.id.iCosh);
+            iTanh = (Button) this.findViewById(R.id.iTanh);
+            twoToTheX = (Button) this.findViewById(R.id.twoToTheX);
+            cubed = (Button) this.findViewById(R.id.cubed);
+            factorial = (Button) this.findViewById(R.id.factorial);
+
+            // radian and degree button
+            radianDegree = (Button) this.findViewById(R.id.radianDegree);
+        }
+    }
+
+    private void initOnClickListeners() {
+        // number buttons
         one.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -140,6 +203,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // other buttons
         history.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) { toggleHistoryMenu();
@@ -151,7 +215,6 @@ public class MainActivity extends AppCompatActivity {
                 backspaceSelected();
             }
         });
-
         clear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -170,7 +233,6 @@ public class MainActivity extends AppCompatActivity {
                 insert('%');
             }
         });
-
         div.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -195,7 +257,6 @@ public class MainActivity extends AppCompatActivity {
                 insert('+');
             }
         });
-
         negate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -214,18 +275,236 @@ public class MainActivity extends AppCompatActivity {
                 calculate();
             }
         });
+
+        if (getResources().getConfiguration().orientation == 2) { // 1 == portrait; 2 == landscape
+            // function buttons page 1
+            second.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    toggleFunctionPage();
+                }
+            });
+            squareRoot.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('1');
+                }
+            });  // function
+            sin.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('1');
+                }
+            }); // function
+            cos.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('1');
+                }
+            }); // function
+            tan.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('1');
+                }
+            }); // function
+            natLog.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('1');
+                }
+            }); // function
+            log.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('1');
+                }
+            }); // function
+            reciprocal.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('1');
+                }
+            });
+            eulerToTheX.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('1');
+                }
+            });
+            squared.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('1');
+                }
+            });
+            xToTheY.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('1');
+                }
+            });
+            absolute.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('1');
+                }
+            }); // function
+            piConstant.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('1');
+                }
+            });
+            euler.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('1');
+                }
+            });
+
+            // function buttons page 2
+            first.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    toggleFunctionPage();
+                }
+            });
+            cubeRoot.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('2');
+                }
+            }); // function
+            iSin.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('2');
+                }
+            }); // function
+            iCos.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('2');
+                }
+            }); // function
+            iTan.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('2');
+                }
+            }); // function
+            sinh.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('2');
+                }
+            }); // function
+            cosh.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('2');
+                }
+            }); // function
+            tanh.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('2');
+                }
+            }); // function
+            iSinh.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('2');
+                }
+            }); // function
+            iCosh.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('2');
+                }
+            }); // function
+            iTanh.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('2');
+                }
+            }); // function
+            twoToTheX.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('2');
+                }
+            });
+            cubed.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('2');
+                }
+            });
+            factorial.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    insert('2');
+                }
+            }); // function
+
+            // radian and degree button
+            radianDegree.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    toggleRadianDegree();
+                }
+            });
+        }
+    }
+
+    private void toggleFunctionPage() {
+        vibrate();
+        Button hiddenButtons[];
+        Button visibleButtons[];
+        if (second.getVisibility() == View.VISIBLE) {
+            visibleButtons = new Button[]{
+                    second, squareRoot, sin, cos, tan, natLog, log, reciprocal, eulerToTheX,
+                    squared, xToTheY, absolute, piConstant, euler};
+            hiddenButtons = new Button[]{
+                    first, cubeRoot, iSin, iCos, iTan, sinh, cosh, tanh,
+                    iSinh, iCosh, iTanh, twoToTheX, cubed, factorial};
+        }
+        else {
+            visibleButtons = new Button[]{
+                    first, cubeRoot, iSin, iCos, iTan, sinh, cosh, tanh,
+                    iSinh, iCosh, iTanh, twoToTheX, cubed, factorial};
+            hiddenButtons = new Button[]{
+                    second, squareRoot, sin, cos, tan, natLog, log, reciprocal, eulerToTheX,
+                    squared, xToTheY, absolute, piConstant, euler};
+        }
+        for (Button b : visibleButtons) {
+            b.setVisibility(View.INVISIBLE);
+        }
+        for (Button b : hiddenButtons) {
+            b.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void toggleRadianDegree() {
+        vibrate();
+        if (radianDegree.getText() == getResources().getString(R.string.radian)) {
+            radianDegree.setText(getResources().getString(R.string.degree));
+        }
+        else {
+            radianDegree.setText(getResources().getString(R.string.radian));
+        }
     }
 
     private void reset() {
-        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        vibrator.vibrate(5);
+        vibrate();
         str = "";
         showResult.setText("");
     }
 
     private void insert(char c) {
-        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        vibrator.vibrate(5);
+        vibrate();
         int selectionStart = showResult.getSelectionStart();
         int selectionEnd = showResult.getSelectionEnd();
 
@@ -361,8 +640,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void insertNegate() {
-        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        vibrator.vibrate(5);
+        vibrate();
         int selectionStart = showResult.getSelectionStart();
 
         /* CASE: STR IS EMPTY */
@@ -429,8 +707,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void calculate() {
-        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        vibrator.vibrate(5);
+        vibrate();
         try {
             if (!str.isEmpty()) {
                 DecimalFormat df = new DecimalFormat("#,###,###,###,###,##0.##############");
@@ -460,8 +737,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void toggleHistoryMenu() {
-        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        vibrator.vibrate(5);
+        vibrate();
         if (historyMenu.isShown()) {
             historyMenu.setVisibility(View.GONE);
             history.setText("HISTORY");
@@ -480,7 +756,7 @@ public class MainActivity extends AppCompatActivity {
      * Disable soft keyboard from appearing, use in conjunction with android:windowSoftInputMode="stateAlwaysHidden|adjustNothing"
      * @param editText
      */
-    public static void disableSoftInputFromAppearing(EditText editText) {
+    private static void disableSoftInputFromAppearing(EditText editText) {
         if (Build.VERSION.SDK_INT >= 11) {
             editText.setRawInputType(InputType.TYPE_CLASS_TEXT);
             editText.setTextIsSelectable(true);
@@ -490,7 +766,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void enableFullscreen() {
+    private void enableFullscreen() {
         // If the Android version is lower than Jellybean, use this call to hide
         // the status bar.
         if (Build.VERSION.SDK_INT < 16) {
@@ -506,8 +782,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void alertMessage(String Message) {
+    private void alertMessage(String Message) {
         Toast.makeText(this, Message, Toast.LENGTH_SHORT).show();
+    }
+
+    private void vibrate() {
+        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator.vibrate(5);
     }
 
     @Override
