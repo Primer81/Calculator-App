@@ -174,61 +174,61 @@ public class MainActivity extends AppCompatActivity {
         one.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insertDigit('1');
+                insert('1');
             }
         });
         two.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insertDigit('2');
+                insert('2');
             }
         });
         three.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insertDigit('3');
+                insert('3');
             }
         });
         four.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insertDigit('4');
+                insert('4');
             }
         });
         five.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insertDigit('5');
+                insert('5');
             }
         });
         six.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insertDigit('6');
+                insert('6');
             }
         });
         seven.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insertDigit('7');
+                insert('7');
             }
         });
         eight.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insertDigit('8');
+                insert('8');
             }
         });
         nine.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insertDigit('9');
+                insert('9');
             }
         });
         zero.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insertDigit('0');
+                insert('0');
             }
         });
 
@@ -253,49 +253,49 @@ public class MainActivity extends AppCompatActivity {
         parenthesis.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insertParenthesis();
+                insert('(');
             }
         });
         percent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insertPercentage();
+                insert('%');
             }
         });
         div.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insertOperator('/');
+                insert('/');
             }
         });
         mul.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insertOperator('*');
+                insert('*');
             }
         });
         sub.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insertOperator('-');
+                insert('-');
             }
         });
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insertOperator('+');
+                insert('+');
             }
         });
         negate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insertNegate();
+                insert('n');
             }
         });
         decimal.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insertDecimal();
+                insert('.');
             }
         });
         equal.setOnClickListener(new View.OnClickListener() {
@@ -468,10 +468,55 @@ public class MainActivity extends AppCompatActivity {
 
     private void insert(char c) {
         vibrate();
+        if (Character.isDigit(c)) {
+            insertDigit(c);
+        }
+        else if (operators.contains(c)) {
+            insertOperator(c);
+        }
+        else if (c == '.') {
+            insertDecimal();
+        }
+        else if (c == '(') {
+            insertParenthesis();
+        }
+        else if (c == 'n') {
+            insertNegate();
+        }
+        else if (c == '%') {
+            insertPercentage();
+        }
+    }
+
+    private void insertDigit(char c) {
+        int selectionStart = showResult.getSelectionStart();
+        int selectionEnd = showResult.getSelectionEnd();
+        char previousSelected =
+                (str.isEmpty() || selectionStart == 0) ? ' ' : str.charAt(selectionStart - 1);
+
+        /* CASE: PREVIOUS SELECTED IS A CLOSED PARENTHESIS, A PERCENTAGE,
+         *       EULER'S, FACTORIAL, OR PI */
+        if (previousSelected == ')' || previousSelected == '%' || previousSelected == 'e'
+                || previousSelected == '!' || previousSelected == '\u03C0') {
+            strongInsert('*');
+            strongInsert(c);
+        }
+        /* CASE: PREVIOUS NUMBER IS ZERO */
+        else if ((previousSelected == '0' && selectionStart - 2 < 0) ||
+                (selectionStart > 1 && previousSelected == '0'
+                        && !Character.isDigit(str.charAt(selectionStart - 2))
+                        && str.charAt(selectionStart - 2) != '.')) {
+            str = str.substring(0, selectionStart - 1)
+                    + str.substring(selectionEnd);
+            showResult.setSelection(selectionStart - 1);
+            strongInsert(c);
+        }
+        else {
+            strongInsert(c);
+        }
     }
 
     private void insertOperator(char c) {
-        vibrate();
         int selectionStart = showResult.getSelectionStart();
         int selectionEnd = showResult.getSelectionEnd();
 
@@ -494,79 +539,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void insertPercentage() {
-        vibrate();
-        int selectionStart = showResult.getSelectionStart();
-        /* CASE: STR IS NOT EMPTY AND SELECTION_START IS GREATER THAN ZERO*/
-        if (str.length() != 0 && selectionStart > 0
-                && (Character.isDigit(str.charAt(selectionStart - 1))
-                    || str.charAt(selectionStart - 1) == '.')) {
-            strongInsert('%');
-        }
-    }
-
-    private void insertDigit(char c) {
-        vibrate();
-        int selectionStart = showResult.getSelectionStart();
-        int selectionEnd = showResult.getSelectionEnd();
-        char previousSelected =
-                (str.isEmpty() || selectionStart == 0) ? ' ' : str.charAt(selectionStart - 1);
-
-        /* CASE: PREVIOUS SELECTED IS A CLOSED PARENTHESIS, A PERCENTAGE,
-         *       EULER'S, FACTORIAL, OR PI */
-        if (previousSelected == ')' || previousSelected == '%' || previousSelected == 'e'
-                || previousSelected == '!' || previousSelected == '\u03C0') {
-            strongInsert('*');
-            strongInsert(c);
-        }
-        /* CASE: PREVIOUS NUMBER IS ZERO */
-        else if ((previousSelected == '0' && selectionStart - 2 < 0) ||
-                (selectionStart > 1 && previousSelected == '0'
-                && !Character.isDigit(str.charAt(selectionStart - 2))
-                && str.charAt(selectionStart - 2) != '.')) {
-            str = str.substring(0, selectionStart - 1)
-                    + str.substring(selectionEnd);
-            showResult.setSelection(selectionStart - 1);
-            strongInsert(c);
-        }
-        else {
-            strongInsert(c);
-        }
-    }
-
-    private void insertParenthesis() {
-        vibrate();
-        int selectionStart = showResult.getSelectionStart();
-        char previousSelection =
-                (str.isEmpty() || selectionStart == 0) ? ' ' : str.charAt(selectionStart - 1);
-        if (str.isEmpty() || selectionStart == 0
-                || operators.contains(previousSelection)
-                || previousSelection == '(') {
-            strongInsert('(');
-        }
-        else {
-            // determine the parenthesis level at the current selection
-            char chars[] = str.substring(0, selectionStart).toCharArray();
-            int parenLevel = 0;
-            for (int i = selectionStart - 1; i >= 0; i--) {
-                if (chars[i] == ')') {
-                    parenLevel -= 1;
-                } else if (chars[i] == '(') {
-                    parenLevel += 1;
-                }
-            }
-            // insert based on parenLevel
-            if (parenLevel == 0) {
-                strongInsert('*');
-                strongInsert('(');
-            } else {
-                strongInsert(')');
-            }
-        }
-    }
-
     private void insertDecimal() {
-        vibrate();
         int selectionStart = showResult.getSelectionStart();
         char chars[] = str.toCharArray();
         // scan the currently selected number for any decimals and return if found.
@@ -601,8 +574,37 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void insertParenthesis() {
+        int selectionStart = showResult.getSelectionStart();
+        char previousSelection =
+                (str.isEmpty() || selectionStart == 0) ? ' ' : str.charAt(selectionStart - 1);
+        if (str.isEmpty() || selectionStart == 0
+                || operators.contains(previousSelection)
+                || previousSelection == '(') {
+            strongInsert('(');
+        }
+        else {
+            // determine the parenthesis level at the current selection
+            char chars[] = str.substring(0, selectionStart).toCharArray();
+            int parenLevel = 0;
+            for (int i = selectionStart - 1; i >= 0; i--) {
+                if (chars[i] == ')') {
+                    parenLevel -= 1;
+                } else if (chars[i] == '(') {
+                    parenLevel += 1;
+                }
+            }
+            // insert based on parenLevel
+            if (parenLevel == 0) {
+                strongInsert('*');
+                strongInsert('(');
+            } else {
+                strongInsert(')');
+            }
+        }
+    }
+
     private void insertNegate() {
-        vibrate();
         int selectionStart = showResult.getSelectionStart();
 
         /* CASE: STR IS EMPTY */
@@ -639,7 +641,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void insertPercentage() {
+        int selectionStart = showResult.getSelectionStart();
+        /* CASE: STR IS NOT EMPTY AND SELECTION_START IS GREATER THAN ZERO*/
+        if (str.length() != 0 && selectionStart > 0
+                && (Character.isDigit(str.charAt(selectionStart - 1))
+                    || str.charAt(selectionStart - 1) == '.')) {
+            strongInsert('%');
+        }
+    }
+
     private void insertFunction(String func) {
+        vibrate();
         for (char c : func.toCharArray()) {
             strongInsert(c);
         }
