@@ -87,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
         arrayAdapter = new ArrayAdapter<>(this, R.layout.list_item, inputHistory);
         historyList.setAdapter(arrayAdapter);
         historyList.setSelection(arrayAdapter.getCount() - 1);
+        disableSoftInputFromAppearing(showResult);
     }
 
     private void initIds() {
@@ -173,61 +174,61 @@ public class MainActivity extends AppCompatActivity {
         one.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insert('1');
+                insertDigit('1');
             }
         });
         two.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insert('2');
+                insertDigit('2');
             }
         });
         three.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insert('3');
+                insertDigit('3');
             }
         });
         four.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insert('4');
+                insertDigit('4');
             }
         });
         five.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insert('5');
+                insertDigit('5');
             }
         });
         six.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insert('6');
+                insertDigit('6');
             }
         });
         seven.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insert('7');
+                insertDigit('7');
             }
         });
         eight.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insert('8');
+                insertDigit('8');
             }
         });
         nine.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insert('9');
+                insertDigit('9');
             }
         });
         zero.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insert('0');
+                insertDigit('0');
             }
         });
 
@@ -264,25 +265,25 @@ public class MainActivity extends AppCompatActivity {
         div.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insert('/');
+                insertOperator('/');
             }
         });
         mul.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insert('*');
+                insertOperator('*');
             }
         });
         sub.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insert('-');
+                insertOperator('-');
             }
         });
         add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insert('+');
+                insertOperator('+');
             }
         });
         negate.setOnClickListener(new View.OnClickListener() {
@@ -467,72 +468,58 @@ public class MainActivity extends AppCompatActivity {
 
     private void insert(char c) {
         vibrate();
+    }
+
+    private void insertOperator(char c) {
+        vibrate();
         int selectionStart = showResult.getSelectionStart();
         int selectionEnd = showResult.getSelectionEnd();
 
-        /* CASE: STR IS EMPTY OR SELECTION_START IS ZERO */
-        if (str.isEmpty() || selectionStart == 0) {
-            if (Character.isDigit(c) || c == '.') {
+        /* CASE: STR IS NOT EMPTY AND SELECTION_START IS GREATER THAN ZERO*/
+        if (str.length() != 0 && selectionStart > 0) {
+            char previousSelected = str.charAt(selectionStart - 1); // char before cursor
+            /* CASE: PREVIOUS SELECTED IS A CLOSED PARENTHESIS, A PERCENTAGE,
+             *       A DIGIT OR A DECIMAL */
+            if (previousSelected == ')' || previousSelected == '%'
+                    || Character.isDigit(previousSelected) || previousSelected == '.') {
+                strongInsert(c);
+            }
+            /* CASE: PREVIOUS SELECTED IS AN OPERATOR */
+            if (operators.contains(previousSelected)) {
+                str = str.substring(0, selectionStart - 1)
+                        + str.substring(selectionEnd);
+                showResult.setSelection(selectionStart - 1);
                 strongInsert(c);
             }
         }
-        /* CASE: STR IS NOT EMPTY */
-        else if (str.length() != 0) {
-            char previousSelected = str.charAt(selectionStart - 1); // char before cursor
-            /* CASE: PREVIOUS SELECTED IS AN OPERATOR OR OPEN PARENTHESIS */
-            if (operators.contains(previousSelected) || previousSelected == '(') {
-                /* CASE: C IS A DIGIT */
-                if (Character.isDigit(c)) {
-                    strongInsert(c);
-                }
-            }
-            /* CASE: PREVIOUS SELECTED IS A CLOSED PARENTHESIS OR A PERCENTAGE */
-            else if (previousSelected == ')' || previousSelected == '%') {
-                // CASE: C IS A OPERATOR
-                if (operators.contains(c)) {
-                    strongInsert(c);
-                }
-                /* CASE: C IS A DIGIT */
-                else if (Character.isDigit(c)) {
-                    strongInsert('*');
-                    strongInsert(c);
-                }
-            }
-            /* CASE: PREVIOUS SELECTED IS A DIGIT OR A DECIMAL */
-            else if (Character.isDigit(previousSelected) || previousSelected == '.') {
-                /* CASE: C IS AN OPERATOR OR PERCENTAGE */
-                if (operators.contains(c) || c == '%') {
-                    strongInsert(c);
-                }
-                /* CASE: C IS A DIGIT */
-                else if (Character.isDigit(c)) {
-                    /* CASE: STR IS OF LENGTH ONE */
-                    if (str.length() == 1) {
-                        if (previousSelected == '0') {
-                            str = "";
-                            showResult.setSelection(selectionStart - 1);
-                            strongInsert(c);
-                        }
-                        else {
-                            strongInsert(c);
-                        }
-                    }
-                    /* CASE: STR IS NOT OF LENGTH ONE */
-                    else {
-                        if (previousSelected == '0'
-                                && !Character.isDigit(str.charAt(selectionStart - 2))
-                                && str.charAt(selectionStart - 2) != '.') {
-                            str = str.substring(0, selectionStart - 1)
-                                    + str.substring(selectionEnd);
-                            showResult.setSelection(selectionStart - 1);
-                            strongInsert(c);
-                        }
-                        else {
-                            strongInsert(c);
-                        }
-                    }
-                }
-            }
+    }
+
+    private void insertDigit(char c) {
+        vibrate();
+        int selectionStart = showResult.getSelectionStart();
+        int selectionEnd = showResult.getSelectionEnd();
+        char previousSelected =
+                (str.isEmpty() || selectionStart == 0) ? ' ' : str.charAt(selectionStart - 1);
+
+        /* CASE: PREVIOUS SELECTED IS A CLOSED PARENTHESIS, A PERCENTAGE,
+         *       EULER'S, FACTORIAL, OR PI */
+        if (previousSelected == ')' || previousSelected == '%' || previousSelected == 'e'
+                || previousSelected == '!' || previousSelected == '\u03C0') {
+            strongInsert('*');
+            strongInsert(c);
+        }
+        /* CASE: PREVIOUS NUMBER IS ZERO */
+        else if ((previousSelected == '0' && selectionStart - 2 < 0) ||
+                (selectionStart > 1 && previousSelected == '0'
+                && !Character.isDigit(str.charAt(selectionStart - 2))
+                && str.charAt(selectionStart - 2) != '.')) {
+            str = str.substring(0, selectionStart - 1)
+                    + str.substring(selectionEnd);
+            showResult.setSelection(selectionStart - 1);
+            strongInsert(c);
+        }
+        else {
+            strongInsert(c);
         }
     }
 
@@ -730,18 +717,18 @@ public class MainActivity extends AppCompatActivity {
                 DecimalFormat df = new DecimalFormat("#,###,###,###,###,##0.##############");
                 str = df.format(eval(str.replace("%", "/100"), radians));
                 hideHistoryMenu();
-
+                // if the input is not the same as the output
                 if (!input.equals(str)) {
                     inputHistory.add(input + '\n' + '=' + str);
                     historyList.setSelection(arrayAdapter.getCount() - 1);
-                }
 
-                // change the results text color to blue
-                SpannableStringBuilder sb = new SpannableStringBuilder(str);
-                sb.setSpan(new ForegroundColorSpan(getColorRefHex(R.color.LightBlue)),
-                        0, str.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                showResult.setText(sb, TextView.BufferType.SPANNABLE);
-                showResult.setSelection(str.length());
+                    // change the results text color to blue
+                    SpannableStringBuilder sb = new SpannableStringBuilder(str);
+                    sb.setSpan(new ForegroundColorSpan(getColorRefHex(R.color.LightBlue)),
+                            0, str.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                    showResult.setText(sb, TextView.BufferType.SPANNABLE);
+                    showResult.setSelection(str.length());
+                }
             }
         } catch (RuntimeException e) {
             alertMessage("Invalid format used.");
@@ -774,6 +761,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void hideHistoryMenu() {
         historyMenu.setVisibility(View.GONE);
+        history.setText("HISTORY");
     }
 
     private void clearHistory() {
