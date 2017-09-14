@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
 import android.text.InputType;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -14,8 +15,10 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,6 +34,10 @@ public class MainActivity extends AppCompatActivity {
     String str = "";
     EditText showResult;
     RelativeLayout historyMenu;
+    ListView historyList;
+    ArrayList<String> inputHistory = new ArrayList<>();
+    Button clearHistory;
+    ArrayAdapter<String> arrayAdapter;
     ArrayList<Character> operators = new ArrayList<>(Arrays.asList(
             '/','*','-','+'));
 
@@ -68,16 +75,26 @@ public class MainActivity extends AppCompatActivity {
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         enableFullscreen();
 
+        // restore previous state
+        if (savedInstanceState != null) {
+            inputHistory = savedInstanceState.getStringArrayList("inputHistory");
+            str = savedInstanceState.getString("str");
+        }
+
         initIds();
         initOnClickListeners();
 
-        disableSoftInputFromAppearing(showResult);
+        arrayAdapter = new ArrayAdapter<>(this, R.layout.list_item, inputHistory);
+        historyList.setAdapter(arrayAdapter);
+        historyList.setSelection(arrayAdapter.getCount() - 1);
     }
 
     private void initIds() {
         // misc ids
         showResult = (EditText) findViewById(R.id.result_id);
         historyMenu = (RelativeLayout) findViewById(R.id.history_menu);
+        historyList = (ListView) findViewById(R.id.history_list);
+        clearHistory = (Button) findViewById(R.id.clear_history);
 
         // number buttons
         one = (Button) this.findViewById(R.id.one);
@@ -144,6 +161,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initOnClickListeners() {
+        // misc buttons
+        clearHistory.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clearHistory();
+            }
+        });
+
         // number buttons
         one.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -289,68 +314,57 @@ public class MainActivity extends AppCompatActivity {
             });
             squareRoot.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    insert('1');
-                }
+                public void onClick(View v) {insertFunction("sqrt("); }
             });  // function
             sin.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    insert('1');
-                }
+                public void onClick(View v) {insertFunction("sin(");}
             }); // function
             cos.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    insert('1');
-                }
-            }); // function
+                public void onClick(View v) {insertFunction("cos(");}}); // function
             tan.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    insert('1');
+                public void onClick(View v) {insertFunction("tan(");
                 }
             }); // function
             natLog.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    insert('1');
+                public void onClick(View v) {insertFunction("ln(");
                 }
             }); // function
             log.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    insert('1');
+                public void onClick(View v) {insertFunction("log(");
                 }
             }); // function
             reciprocal.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    insert('1');
+                    insertFunction("1/");
                 }
             });
             eulerToTheX.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    insert('1');
+                    insertFunction("e^(");
                 }
             });
             squared.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    insert('1');
+                    insertFunction("^(2)");
                 }
             });
             xToTheY.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    insert('1');
+                    insertFunction("^(");
                 }
             });
             absolute.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    insert('1');
+                public void onClick(View v) {insertFunction("abs(");
                 }
             }); // function
             piConstant.setOnClickListener(new View.OnClickListener() {
@@ -362,7 +376,7 @@ public class MainActivity extends AppCompatActivity {
             euler.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    insert('1');
+                    insertFunction("e");
                 }
             });
 
@@ -375,80 +389,69 @@ public class MainActivity extends AppCompatActivity {
             });
             cubeRoot.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    insert('2');
+                public void onClick(View v) {insertFunction("cbrt(");
                 }
             }); // function
             iSin.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    insert('2');
+                public void onClick(View v) {insertFunction("asin(");
                 }
             }); // function
             iCos.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    insert('2');
+                public void onClick(View v) {insertFunction("acos(");
                 }
             }); // function
             iTan.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    insert('2');
+                public void onClick(View v) {insertFunction("atan(");
                 }
             }); // function
             sinh.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    insert('2');
+                public void onClick(View v) {insertFunction("sinh(");
                 }
             }); // function
             cosh.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    insert('2');
+                public void onClick(View v) {insertFunction("cosh(");
                 }
             }); // function
             tanh.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    insert('2');
+                public void onClick(View v) {insertFunction("tanh(");
                 }
             }); // function
             iSinh.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    insert('2');
+                public void onClick(View v) {insertFunction("asinh(");
                 }
             }); // function
             iCosh.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    insert('2');
+                public void onClick(View v) {insertFunction("acosh(");
                 }
             }); // function
             iTanh.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    insert('2');
+                public void onClick(View v) {insertFunction("atanh(");
                 }
             }); // function
             twoToTheX.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    insert('2');
+                    insertFunction("2^(");
                 }
             });
             cubed.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    insert('2');
+                    insertFunction("^(3)");
                 }
             });
             factorial.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    insert('2');
+                public void onClick(View v) {insertFunction("fact(");
                 }
             }); // function
 
@@ -478,7 +481,7 @@ public class MainActivity extends AppCompatActivity {
             char previousSelected = str.charAt(selectionStart - 1); // char before cursor
             /* CASE: PREVIOUS SELECTED IS AN OPERATOR OR OPEN PARENTHESIS */
             if (operators.contains(previousSelected) || previousSelected == '(') {
-                /* CASE: C IS A DIGIT OR DECIMAL */
+                /* CASE: C IS A DIGIT */
                 if (Character.isDigit(c)) {
                     strongInsert(c);
                 }
@@ -489,13 +492,13 @@ public class MainActivity extends AppCompatActivity {
                 if (operators.contains(c)) {
                     strongInsert(c);
                 }
-                /* CASE: C IS A DIGIT OR PERCENTAGE */
+                /* CASE: C IS A DIGIT */
                 else if (Character.isDigit(c)) {
                     strongInsert('*');
                     strongInsert(c);
                 }
             }
-            /* CASE: PREVIOUS SELECTED IS A DIGIT, A DECIMAL */
+            /* CASE: PREVIOUS SELECTED IS A DIGIT OR A DECIMAL */
             else if (Character.isDigit(previousSelected) || previousSelected == '.') {
                 /* CASE: C IS AN OPERATOR OR PERCENTAGE */
                 if (operators.contains(c) || c == '%') {
@@ -638,6 +641,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void insertFunction(String func) {
+        for (char c : func.toCharArray()) {
+            strongInsert(c);
+        }
+    }
+
     private void strongInsert(char c) {
         int selectionStart = showResult.getSelectionStart();
         int selectionEnd = showResult.getSelectionEnd();
@@ -717,8 +726,16 @@ public class MainActivity extends AppCompatActivity {
         vibrate();
         try {
             if (!str.isEmpty()) {
+                String input = str;
                 DecimalFormat df = new DecimalFormat("#,###,###,###,###,##0.##############");
                 str = df.format(eval(str.replace("%", "/100"), radians));
+                hideHistoryMenu();
+
+                if (!input.equals(str)) {
+                    inputHistory.add(input + '\n' + '=' + str);
+                    historyList.setSelection(arrayAdapter.getCount() - 1);
+                }
+
                 // change the results text color to blue
                 SpannableStringBuilder sb = new SpannableStringBuilder(str);
                 sb.setSpan(new ForegroundColorSpan(getColorRefHex(R.color.LightBlue)),
@@ -753,6 +770,16 @@ public class MainActivity extends AppCompatActivity {
             historyMenu.setVisibility(View.VISIBLE);
             history.setText("KEYPAD");
         }
+    }
+
+    private void hideHistoryMenu() {
+        historyMenu.setVisibility(View.GONE);
+    }
+
+    private void clearHistory() {
+        vibrate();
+        inputHistory.clear();
+        hideHistoryMenu();
     }
 
     private int getColorRefHex(@android.support.annotation.ColorRes int id) {
@@ -824,6 +851,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        // Save UI state changes to the savedInstanceState.
+        // This bundle will be passed to onCreate if the process is
+        // killed and restarted.
+        savedInstanceState.putStringArrayList("inputHistory", inputHistory);
+        savedInstanceState.putString("str", str);
     }
 
     private static double eval(final String str, final boolean radians) {

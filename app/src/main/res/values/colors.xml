@@ -7,6 +7,7 @@
     <color name="LessWhite">#f6f6f6</color>
     <color name="Function_Pad_Background_Color">#f6f6f6</color>
     <color name="Keypad_Border_Color">#e3e3e3</color>
+    <color name="Light_Gray">#e3e3e3</color>
     <color name="Silver">#FFC0C0C0</color>
     <color name="Gray">#FF808080</color>
     <color name="Black">#FF000000</color>
