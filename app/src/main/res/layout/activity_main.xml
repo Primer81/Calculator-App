@@ -513,25 +513,29 @@
             android:layout_marginRight="@dimen/tiny_margin_2"
             android:layout_marginTop="@dimen/tiny_margin_2"
             android:layout_marginLeft="@dimen/tiny_margin_2"
-            android:background="@color/White" />
+            android:background="@color/White"
+            android:divider="@drawable/list_divider"
+            android:dividerHeight="1dp"/>
 
         <View
-            android:layout_width="215dp"
+            android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_above="@+id/clear_history"
             android:layout_centerHorizontal="true"
-            android:background="@color/Silver"/>
+            android:background="@color/Silver"
+            android:layout_marginEnd="@dimen/history_inside_padding"
+            android:layout_marginStart="@dimen/history_inside_padding"/>
 
         <Button
             android:id="@+id/clear_history"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="40dp"
             android:layout_alignParentBottom="true"
             android:layout_marginRight="@dimen/tiny_margin_2"
             android:layout_marginBottom="@dimen/tiny_margin_2"
             android:layout_marginLeft="@dimen/tiny_margin_2"
             android:text="CLEAR HISTORY"
-            android:textSize="20sp"
+            android:textSize="16sp"
             android:textColor="@color/LightBlue"
             android:textAppearance="@style/AlertDialog.AppCompat"
             android:background="@color/White"
