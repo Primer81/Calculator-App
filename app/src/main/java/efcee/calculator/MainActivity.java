@@ -767,6 +767,7 @@ public class MainActivity extends AppCompatActivity {
     private void clearHistory() {
         vibrate();
         inputHistory.clear();
+        arrayAdapter.notifyDataSetChanged();
         hideHistoryMenu();
     }
 
