@@ -536,12 +536,12 @@ public class MainActivity extends AppCompatActivity {
     private void insertParenthesis() {
         vibrate();
         int selectionStart = showResult.getSelectionStart();
+        char previousSelection =
+                (str.isEmpty() || selectionStart == 0) ? ' ' : str.charAt(selectionStart - 1);
         if (str.isEmpty() || selectionStart == 0
-                || operators.contains(str.charAt(selectionStart - 1))) {
+                || operators.contains(previousSelection)
+                || previousSelection == '(') {
             strongInsert('(');
-        }
-        else if (str.charAt(selectionStart - 1) == '('){
-            return; // do nothing
         }
         else {
             // determine the parenthesis level at the current selection
