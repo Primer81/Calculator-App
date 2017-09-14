@@ -259,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
         percent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                insert('%');
+                insertPercentage();
             }
         });
         div.setOnClickListener(new View.OnClickListener() {
@@ -491,6 +491,17 @@ public class MainActivity extends AppCompatActivity {
                 showResult.setSelection(selectionStart - 1);
                 strongInsert(c);
             }
+        }
+    }
+
+    private void insertPercentage() {
+        vibrate();
+        int selectionStart = showResult.getSelectionStart();
+        /* CASE: STR IS NOT EMPTY AND SELECTION_START IS GREATER THAN ZERO*/
+        if (str.length() != 0 && selectionStart > 0
+                && (Character.isDigit(str.charAt(selectionStart - 1))
+                    || str.charAt(selectionStart - 1) == '.')) {
+            strongInsert('%');
         }
     }
 
