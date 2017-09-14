@@ -468,6 +468,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void insert(char c) {
         vibrate();
+        if (showResult.getSelectionStart() != showResult.getSelectionEnd()) {
+            backspaceSelected();
+        }
         if (Character.isDigit(c)) {
             insertDigit(c);
         }
@@ -730,6 +733,7 @@ public class MainActivity extends AppCompatActivity {
             vibrator.vibrate(5);
             str = str.substring(0, selectionStart) + str.substring(selectionEnd);
             showResult.setText(str);
+            showResult.setSelection(selectionStart);
         }
     }
 
