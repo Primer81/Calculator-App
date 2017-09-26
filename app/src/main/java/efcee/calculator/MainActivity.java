@@ -15,6 +15,8 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -778,18 +780,31 @@ public class MainActivity extends AppCompatActivity {
     private void toggleHistoryMenu() {
         vibrate();
         if (historyMenu.isShown()) {
-            historyMenu.setVisibility(View.GONE);
-            history.setText("HISTORY");
+            hideHistoryMenu();
         }
         else {
-            historyMenu.setVisibility(View.VISIBLE);
-            history.setText("KEYPAD");
+            revealHistoryMenu();
         }
     }
 
     private void hideHistoryMenu() {
+        // animate the history menu flying out
+        Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.flyout);
+        findViewById(R.id.history_menu).setAnimation(anim);
+        anim.start();
+        // set menu to gone
         historyMenu.setVisibility(View.GONE);
         history.setText("HISTORY");
+    }
+
+    private void revealHistoryMenu() {
+        // animate the history menu flying in
+        Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.flyin);
+        findViewById(R.id.history_menu).setAnimation(anim);
+        anim.start();
+        // set menu to visible
+        historyMenu.setVisibility(View.VISIBLE);
+        history.setText("KEYPAD");
     }
 
     private void clearHistory() {
