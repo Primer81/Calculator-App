@@ -1156,7 +1156,7 @@
             android:layout_marginLeft="@dimen/tiny_margin_2"
             android:background="@color/White"
             android:divider="@drawable/list_divider"
-            android:dividerHeight="4dp"/>
+            android:dividerHeight="1dp"/>
 
         <View
             android:layout_width="match_parent"
