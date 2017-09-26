@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Html;
 import android.text.InputType;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -809,9 +808,22 @@ public class MainActivity extends AppCompatActivity {
 
     private void clearHistory() {
         vibrate();
+
+        Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fadeout_up);
+        for (int i = 0; i < historyList.getChildCount(); i++) {
+            View v = historyList.getChildAt(i);
+            v.setAnimation(anim);
+        }
+        anim.start();
         inputHistory.clear();
         arrayAdapter.notifyDataSetChanged();
-        hideHistoryMenu();
+        // hide history menu after the first animation finishes
+        historyList.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                hideHistoryMenu();
+            }
+        }, anim.getDuration());
     }
 
     private int getColorRefHex(@android.support.annotation.ColorRes int id) {

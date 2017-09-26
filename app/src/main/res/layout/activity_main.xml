@@ -498,7 +498,6 @@
         android:layout_height="0dp"
         android:background="@color/Keypad_Border_Color"
         android:visibility="gone"
-        android:animateLayoutChanges="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/equal"
         app:layout_constraintStart_toStartOf="parent"
