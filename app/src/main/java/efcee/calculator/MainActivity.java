@@ -4,6 +4,7 @@ import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -253,6 +254,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 reset();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    RippleDrawable ripple = (RippleDrawable) showResult.getBackground();
+                    ripple.setHotspot(0, 0);
+                    showResult.requestFocus();
+                    showResult.clearFocus();
+                }
             }
         });
         parenthesis.setOnClickListener(new View.OnClickListener() {

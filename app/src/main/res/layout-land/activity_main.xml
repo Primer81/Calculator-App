@@ -14,7 +14,7 @@
         android:id="@+id/result_id"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@drawable/white_to_less_white_grad"
+        android:background="@drawable/result_window_bg"
         android:layout_margin="0px"
         android:gravity="top|end"
         android:paddingRight="24dp"

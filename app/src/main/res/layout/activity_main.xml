@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:focusableInTouchMode="true"
     android:background="@color/Keypad_Border_Color"
     tools:context="efcee.calculator.MainActivity">
 
@@ -14,7 +15,7 @@
         android:id="@+id/result_id"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@drawable/white_to_less_white_grad"
+        android:background="@drawable/result_window_bg"
         android:layout_margin="0px"
         android:gravity="top|end"
         android:padding="24dp"
