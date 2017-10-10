@@ -515,7 +515,8 @@
             android:layout_marginLeft="@dimen/tiny_margin_2"
             android:background="@color/White"
             android:divider="@drawable/list_divider"
-            android:dividerHeight="1dp"/>
+            android:dividerHeight="1dp"
+            android:stackFromBottom="true"/>
 
         <View
             android:layout_width="match_parent"
