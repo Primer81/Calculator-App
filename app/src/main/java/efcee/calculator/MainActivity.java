@@ -1,10 +1,9 @@
 package efcee.calculator;
 
 import android.animation.AnimatorInflater;
-import android.animation.ArgbEvaluator;
-import android.animation.ValueAnimator;
+import android.animation.AnimatorSet;
 import android.content.Context;
-import android.graphics.Color;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -89,7 +88,6 @@ public class MainActivity extends AppCompatActivity {
 
         initIds();
         initOnClickListeners();
-        initOnTouchListeners();
 
         arrayAdapter = new ArrayAdapter<>(this, R.layout.list_item, inputHistory);
         historyList.setAdapter(arrayAdapter);
@@ -471,57 +469,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
-    }
-
-    private void initOnTouchListeners() {
-        one.setOnTouchListener(getButtonListener());
-    }
-
-    private View.OnTouchListener getButtonListener() {
-        return new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent ev) {
-                final int x = (int) ev.getX();
-                final int y = (int) ev.getY();
-                final int action = ev.getAction();
-                final ValueAnimator anim = new ValueAnimator();
-                anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                        one.setBackgroundColor((Integer)valueAnimator.getAnimatedValue());
-                    }
-                });
-                switch (action & MotionEvent.ACTION_MASK) {
-                    case MotionEvent.ACTION_DOWN: {
-                        if (anim.isStarted()) {
-                            anim.end();
-                        }
-                        final int duration = 500;
-                        anim.setDuration(duration);
-                        anim.setIntValues(
-                                getColorRefHex(R.color.White),
-                                getColorRefHex(R.color.VeryLightBlue));
-                        anim.setEvaluator(new ArgbEvaluator());
-                        anim.start();
-                        break;
-                    }
-                    case MotionEvent.ACTION_UP: {
-                        if (anim.isStarted()) {
-                            anim.end();
-                        }
-                        final int duration = 50;
-                        anim.setDuration(duration);
-                        anim.setIntValues(
-                                getColorRefHex(R.color.VeryLightBlue),
-                                getColorRefHex(R.color.White));
-                        anim.setEvaluator(new ArgbEvaluator());
-                        anim.start();
-                        break;
-                    }
-                }
-                return true;
-            }
-        };
     }
 
     private void insert(char c) {

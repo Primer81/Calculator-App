@@ -20,7 +20,7 @@
     <color name="Green">#FF008000</color>
     <color name="Aqua">#FF00FFFF</color>
     <color name="LightBlue">#2799ee</color>
-    <color name="VeryLightBlue">#c2eafd</color>
+    <color name="ButtonTouched1">#c6ecff</color>
     <color name="Teal">#FF008080</color>
     <color name="Blue">#FF0000FF</color>
     <color name="Navy">#FF000080</color>
