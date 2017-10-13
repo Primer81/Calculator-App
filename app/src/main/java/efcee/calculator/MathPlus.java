@@ -25,7 +25,7 @@ public final class MathPlus {
         if (x == 0) {
             return 1;
         }
-        int fact = 1; // this  will be the result
+        int fact = 1; // this  will be the result_edit_text
         for (int i = 1; i <= x; i++) {
             fact *= i;
         }

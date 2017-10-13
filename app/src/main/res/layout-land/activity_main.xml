@@ -11,7 +11,7 @@
     <!--Result View-->
 
     <EditText
-        android:id="@+id/result_id"
+        android:id="@+id/result_edit_text"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@drawable/result_window_bg"
@@ -52,7 +52,7 @@
         android:textAppearance="@style/AlertDialog.AppCompat"
         tools:layout_editor_absoluteY="0dp"
         tools:layout_editor_absoluteX="0dp"
-        app:layout_constraintTop_toBottomOf="@+id/result_id"
+        app:layout_constraintTop_toBottomOf="@+id/result_edit_text"
         app:layout_constraintBottom_toTopOf="@+id/clear"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/buffer"
@@ -70,7 +70,7 @@
         android:layout_margin="0px"
         tools:layout_editor_absoluteY="0dp"
         tools:layout_editor_absoluteX="0dp"
-        app:layout_constraintTop_toBottomOf="@+id/result_id"
+        app:layout_constraintTop_toBottomOf="@+id/result_edit_text"
         app:layout_constraintBottom_toTopOf="@+id/clear"
         app:layout_constraintStart_toEndOf="@+id/history"
         app:layout_constraintEnd_toStartOf="@+id/backspace"
@@ -94,7 +94,7 @@
         android:textAppearance="@style/AlertDialog.AppCompat"
         tools:layout_editor_absoluteY="0dp"
         tools:layout_editor_absoluteX="0dp"
-        app:layout_constraintTop_toBottomOf="@+id/result_id"
+        app:layout_constraintTop_toBottomOf="@+id/result_edit_text"
         app:layout_constraintBottom_toTopOf="@+id/div"
         app:layout_constraintStart_toEndOf="@+id/buffer"
         app:layout_constraintEnd_toEndOf="parent"

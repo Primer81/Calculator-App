@@ -1,9 +1,6 @@
 package efcee.calculator;
 
-import android.animation.AnimatorInflater;
-import android.animation.AnimatorSet;
 import android.content.Context;
-import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,7 +11,6 @@ import android.text.InputType;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,11 +34,12 @@ import java.util.regex.Pattern;
 public class MainActivity extends AppCompatActivity {
 
     String str = "";
-    EditText showResult;
-    RelativeLayout historyMenu;
-    ListView historyList;
+    EditText result_edit_text;
+    RelativeLayout result_layout;
+    RelativeLayout history_menu;
+    ListView history_list;
     ArrayList<String> inputHistory = new ArrayList<>();
-    Button clearHistory;
+    Button clear_history;
     ArrayAdapter<String> arrayAdapter;
     ArrayList<Character> operators = new ArrayList<>(Arrays.asList(
             '/','*','-','+'));
@@ -91,17 +88,18 @@ public class MainActivity extends AppCompatActivity {
         initOnClickListeners();
 
         arrayAdapter = new ArrayAdapter<>(this, R.layout.list_item, inputHistory);
-        historyList.setAdapter(arrayAdapter);
-        historyList.setSelection(arrayAdapter.getCount() - 1);
-        disableSoftInputFromAppearing(showResult);
+        history_list.setAdapter(arrayAdapter);
+        history_list.setSelection(arrayAdapter.getCount() - 1);
+        disableSoftInputFromAppearing(result_edit_text);
     }
 
     private void initIds() {
         // misc ids
-        showResult = (EditText) findViewById(R.id.result_id);
-        historyMenu = (RelativeLayout) findViewById(R.id.history_menu);
-        historyList = (ListView) findViewById(R.id.history_list);
-        clearHistory = (Button) findViewById(R.id.clear_history);
+        result_edit_text = (EditText) findViewById(R.id.result_edit_text);
+        result_layout = (RelativeLayout) findViewById(R.id.result_layout);
+        history_menu = (RelativeLayout) findViewById(R.id.history_menu);
+        history_list = (ListView) findViewById(R.id.history_list);
+        clear_history = (Button) findViewById(R.id.clear_history);
 
         // number buttons
         one = (Button) this.findViewById(R.id.one);
@@ -169,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initOnClickListeners() {
         // misc buttons
-        clearHistory.setOnClickListener(new View.OnClickListener() {
+        clear_history.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 clearHistory();
@@ -255,10 +253,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 reset();
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    RippleDrawable ripple = (RippleDrawable) showResult.getBackground();
-                    ripple.setHotspot(0, 0);
-                    showResult.requestFocus();
-                    showResult.clearFocus();
+                    RippleDrawable ripple = (RippleDrawable) result_layout.getBackground();
                 }
             }
         });
@@ -480,7 +475,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void insert(char c) {
         vibrate();
-        if (showResult.getSelectionStart() != showResult.getSelectionEnd()) {
+        if (result_edit_text.getSelectionStart() != result_edit_text.getSelectionEnd()) {
             backspaceSelected();
         }
         if (Character.isDigit(c)) {
@@ -504,8 +499,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void insertDigit(char c) {
-        int selectionStart = showResult.getSelectionStart();
-        int selectionEnd = showResult.getSelectionEnd();
+        int selectionStart = result_edit_text.getSelectionStart();
+        int selectionEnd = result_edit_text.getSelectionEnd();
         char previousSelected =
                 (str.isEmpty() || selectionStart == 0) ? ' ' : str.charAt(selectionStart - 1);
 
@@ -523,7 +518,7 @@ public class MainActivity extends AppCompatActivity {
                         && str.charAt(selectionStart - 2) != '.')) {
             str = str.substring(0, selectionStart - 1)
                     + str.substring(selectionEnd);
-            showResult.setSelection(selectionStart - 1);
+            result_edit_text.setSelection(selectionStart - 1);
             strongInsert(c);
         }
         else {
@@ -532,8 +527,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void insertOperator(char c) {
-        int selectionStart = showResult.getSelectionStart();
-        int selectionEnd = showResult.getSelectionEnd();
+        int selectionStart = result_edit_text.getSelectionStart();
+        int selectionEnd = result_edit_text.getSelectionEnd();
 
         /* CASE: STR IS NOT EMPTY AND SELECTION_START IS GREATER THAN ZERO*/
         if (str.length() != 0 && selectionStart > 0) {
@@ -548,14 +543,14 @@ public class MainActivity extends AppCompatActivity {
             if (operators.contains(previousSelected)) {
                 str = str.substring(0, selectionStart - 1)
                         + str.substring(selectionEnd);
-                showResult.setSelection(selectionStart - 1);
+                result_edit_text.setSelection(selectionStart - 1);
                 strongInsert(c);
             }
         }
     }
 
     private void insertDecimal() {
-        int selectionStart = showResult.getSelectionStart();
+        int selectionStart = result_edit_text.getSelectionStart();
         char chars[] = str.toCharArray();
         // scan the currently selected number for any decimals and return if found.
         // scan beyond the current selection
@@ -590,7 +585,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void insertParenthesis() {
-        int selectionStart = showResult.getSelectionStart();
+        int selectionStart = result_edit_text.getSelectionStart();
         char previousSelection =
                 (str.isEmpty() || selectionStart == 0) ? ' ' : str.charAt(selectionStart - 1);
         if (str.isEmpty() || selectionStart == 0
@@ -620,7 +615,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void insertNegate() {
-        int selectionStart = showResult.getSelectionStart();
+        int selectionStart = result_edit_text.getSelectionStart();
 
         /* CASE: STR IS EMPTY */
         if (str.length() == 0) {
@@ -639,10 +634,10 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     }
                 }
-                showResult.setSelection(selectionStart - offset);
+                result_edit_text.setSelection(selectionStart - offset);
                 strongInsert('(');
                 strongInsert('-');
-                showResult.setSelection(selectionStart + 2);
+                result_edit_text.setSelection(selectionStart + 2);
             }
             else if (operators.contains(previousSelected)){
                 strongInsert('(');
@@ -657,7 +652,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void insertPercentage() {
-        int selectionStart = showResult.getSelectionStart();
+        int selectionStart = result_edit_text.getSelectionStart();
         /* CASE: STR IS NOT EMPTY AND SELECTION_START IS GREATER THAN ZERO*/
         if (str.length() != 0 && selectionStart > 0
                 && (Character.isDigit(str.charAt(selectionStart - 1))
@@ -674,12 +669,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void strongInsert(char c) {
-        int selectionStart = showResult.getSelectionStart();
-        int selectionEnd = showResult.getSelectionEnd();
+        int selectionStart = result_edit_text.getSelectionStart();
+        int selectionEnd = result_edit_text.getSelectionEnd();
         str = str.substring(0, selectionStart) + c + str.substring(selectionEnd);
         // change operator characters' colors to blue
         setResultText(str);
-        showResult.setSelection(selectionStart + 1);
+        result_edit_text.setSelection(selectionStart + 1);
     }
 
     private void toggleFunctionPage() {
@@ -725,27 +720,27 @@ public class MainActivity extends AppCompatActivity {
     private void reset() {
         vibrate();
         str = "";
-        showResult.setText("");
+        result_edit_text.setText("");
     }
 
     private void backspaceSelected() {
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        int selectionStart = showResult.getSelectionStart();
-        int selectionEnd = showResult.getSelectionEnd();
+        int selectionStart = result_edit_text.getSelectionStart();
+        int selectionEnd = result_edit_text.getSelectionEnd();
         if (selectionStart == selectionEnd) {
             if (selectionStart > 0) {
                 vibrator.vibrate(5);
                 str = str.substring(0, selectionStart - 1)
                         + str.substring(selectionEnd);
                 setResultText(str);
-                showResult.setSelection(selectionStart - 1);
+                result_edit_text.setSelection(selectionStart - 1);
             }
         }
         else {
             vibrator.vibrate(5);
             str = str.substring(0, selectionStart) + str.substring(selectionEnd);
-            showResult.setText(str);
-            showResult.setSelection(selectionStart);
+            result_edit_text.setText(str);
+            result_edit_text.setSelection(selectionStart);
         }
     }
 
@@ -760,14 +755,14 @@ public class MainActivity extends AppCompatActivity {
                 // if the input is not the same as the output
                 if (!input.equals(str)) {
                     inputHistory.add(input + '\n' + '=' + str);
-                    historyList.setSelection(arrayAdapter.getCount() - 1);
+                    history_list.setSelection(arrayAdapter.getCount() - 1);
 
                     // change the results text color to blue
                     SpannableStringBuilder sb = new SpannableStringBuilder(str);
                     sb.setSpan(new ForegroundColorSpan(getColorRefHex(R.color.LightBlue)),
                             0, str.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
-                    showResult.setText(sb, TextView.BufferType.SPANNABLE);
-                    showResult.setSelection(str.length());
+                    result_edit_text.setText(sb, TextView.BufferType.SPANNABLE);
+                    result_edit_text.setSelection(str.length());
                 }
             }
         } catch (RuntimeException e) {
@@ -784,12 +779,12 @@ public class MainActivity extends AppCompatActivity {
             sb.setSpan(new ForegroundColorSpan(getColorRefHex(R.color.LightBlue)),
                     m.start(), m.end(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
         }
-        showResult.setText(sb, TextView.BufferType.SPANNABLE);
+        result_edit_text.setText(sb, TextView.BufferType.SPANNABLE);
     }
 
     private void toggleHistoryMenu() {
         vibrate();
-        if (historyMenu.isShown()) {
+        if (history_menu.isShown()) {
             hideHistoryMenu();
         }
         else {
@@ -803,7 +798,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.history_menu).setAnimation(anim);
         anim.start();
         // set menu to gone
-        historyMenu.setVisibility(View.GONE);
+        history_menu.setVisibility(View.GONE);
         history.setText("HISTORY");
     }
 
@@ -813,7 +808,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.history_menu).setAnimation(anim);
         anim.start();
         // set menu to visible
-        historyMenu.setVisibility(View.VISIBLE);
+        history_menu.setVisibility(View.VISIBLE);
         history.setText("KEYPAD");
     }
 
@@ -821,15 +816,15 @@ public class MainActivity extends AppCompatActivity {
         vibrate();
 
         Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fadeout_up);
-        for (int i = 0; i < historyList.getChildCount(); i++) {
-            View v = historyList.getChildAt(i);
+        for (int i = 0; i < history_list.getChildCount(); i++) {
+            View v = history_list.getChildAt(i);
             v.setAnimation(anim);
         }
         anim.start();
         inputHistory.clear();
         arrayAdapter.notifyDataSetChanged();
         // hide history menu after the first animation finishes
-        historyList.postDelayed(new Runnable() {
+        history_list.postDelayed(new Runnable() {
             @Override
             public void run() {
                 hideHistoryMenu();
